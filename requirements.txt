@@ -1,0 +1,14 @@
+# Requirements for AQUAVISION project
+# Install PyTorch with CUDA support: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+
+fastapi==0.135.2
+uvicorn[standard]==0.35.0
+pydantic==2.10.6
+opencv-python==4.13.0.92
+numpy==2.2.6
+torch==2.11.0+cu130
+torchvision==0.26.0+cu130
+ultralytics==8.4.26
+tensorrt==10.16.0.72
+python-multipart==0.0.9
+python-dotenv==1.2.2

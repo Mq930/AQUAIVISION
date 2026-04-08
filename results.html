@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Results — AQUAVISION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:     #020c18;
+  --bg2:    #04162a;
+  --card:   #071d33;
+  --border: #0d3557;
+  --cyan:   #00d4ff;
+  --aqua:   #00ffb3;
+  --warn:   #ff3b3b;
+  --text:   #ddeeff;
+  --muted:  #4d7a9e;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+#sonar-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.2;
+}
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 64px;
+  background: rgba(2,12,24,0.9); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.12em; color: var(--cyan); text-decoration: none; }
+.nav-logo span { color: var(--aqua); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--cyan); }
+
+.page-hero {
+  position: relative; z-index: 1;
+  padding: 140px 48px 80px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  overflow: hidden;
+}
+.page-hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; text-align: center; }
+.eyebrow { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--aqua); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; justify-content: center; }
+.eyebrow::before { content: '//'; opacity: 0.5; }
+h1.page-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 5vw, 5rem); letter-spacing: 0.04em; line-height: 0.95; color: #fff; margin-bottom: 24px; }
+h1.page-title span { color: var(--cyan); }
+.page-intro { font-size: 1.08rem; color: #7aafcc; font-weight: 300; max-width: 720px; margin: 0 auto; }
+
+.results-body { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+.section-pad { padding: 80px 48px; }
+
+.perf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 40px; }
+.perf-card { background: var(--card); border: 1px solid var(--border); padding: 32px; text-align: center; }
+.perf-val { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 0.06em; color: var(--cyan); line-height: 1; margin-bottom: 8px; }
+.perf-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.perf-note { font-size: 0.9rem; color: #6b9ab8; margin-top: 12px; }
+
+.model-section { margin-top: 60px; }
+.model-card { background: var(--card); border: 1px solid var(--border); margin-bottom: 24px; }
+.model-header { padding: 24px 32px; border-bottom: 1px solid var(--border); }
+.model-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.08em; color: #fff; margin-bottom: 4px; }
+.model-subtitle { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.model-content { padding: 32px; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.metric-item { text-align: center; }
+.metric-val { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--cyan); }
+.metric-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+footer { background: #010810; border-top: 1px solid var(--border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+.footer-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.12em; color: var(--muted); }
+.footer-brand span { color: var(--cyan); }
+.footer-note { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; color: #1e3a52; text-transform: uppercase; }
+
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .section-pad { padding: 60px 24px; }
+  .page-hero { padding: 120px 24px 60px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="sonar-canvas"></canvas>
+
+<nav>
+  <a class="nav-logo" href="/">AQUA<span>VISION</span></a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/upload">Upload</a></li>
+    <li><a href="/results" class="active">Results</a></li>
+  </ul>
+</nav>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="eyebrow">Model Performance</div>
+    <h1 class="page-title">RESULTS & <span>METRICS</span></h1>
+    <p class="page-intro">
+      Detailed performance metrics, validation results, and evaluation scores for the AQUAVISION underwater enhancement and detection pipeline.
+    </p>
+  </div>
+</section>
+
+<div class="results-body">
+  <div class="section-pad">
+    <div class="perf-grid">
+      <div class="perf-card">
+        <div class="perf-val">24.87</div>
+        <div class="perf-label">PSNR (dB)</div>
+        <div class="perf-note">Peak Signal-to-Noise Ratio for enhancement quality</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-val">0.891</div>
+        <div class="perf-label">SSIM Score</div>
+        <div class="perf-note">Structural Similarity Index for perceptual quality</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-val">84.7%</div>
+        <div class="perf-label">mAP@50</div>
+        <div class="perf-note">Mean Average Precision at IoU 0.5 for object detection</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-val">53</div>
+        <div class="perf-label">FPS</div>
+        <div class="perf-note">Frames per second processing rate on GPU</div>
+      </div>
+    </div>
+
+    <div class="model-section">
+      <div class="model-card">
+        <div class="model-header">
+          <div class="model-title">UNet Enhancement Model</div>
+          <div class="model-subtitle">Lightweight Underwater Image Enhancement</div>
+        </div>
+        <div class="model-content">
+          <div class="metric-grid">
+            <div class="metric-item">
+              <div class="metric-val">24.87 dB</div>
+              <div class="metric-label">PSNR</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">0.891</div>
+              <div class="metric-label">SSIM</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">2.1 MB</div>
+              <div class="metric-label">Model Size</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">FP16</div>
+              <div class="metric-label">Precision</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header">
+          <div class="model-title">YOLOv26-M Detection Model</div>
+          <div class="model-subtitle">Marine Object Detection & Classification</div>
+        </div>
+        <div class="model-content">
+          <div class="metric-grid">
+            <div class="metric-item">
+              <div class="metric-val">84.7%</div>
+              <div class="metric-label">mAP@50</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">13</div>
+              <div class="metric-label">Classes</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">8.5 MB</div>
+              <div class="metric-label">Model Size</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">FP16</div>
+              <div class="metric-label">Precision</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">AQUA<span>VISION</span></div>
+  <div class="footer-note">Underwater Enhancement · Maritime Detection · TensorRT</div>
+</footer>
+
+<script>
+// Simple sonar canvas background
+const canvas = document.getElementById('sonar-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, rings = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function addRing() {
+  rings.push({
+    x: W/2, y: H/2,
+    r: 0, maxR: Math.max(W,H),
+    speed: 0.5
+  });
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  rings.forEach((ring, i) => {
+    ring.r += ring.speed;
+    const alpha = 0.1 * (1 - ring.r / ring.maxR);
+    ctx.beginPath();
+    ctx.arc(ring.x, ring.y, ring.r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(0,212,255,${alpha})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    if (ring.r > ring.maxR) rings.splice(i, 1);
+  });
+  if (Math.random() < 0.01) addRing();
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>

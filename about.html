@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About — AQUAVISION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:     #020c18;
+  --bg2:    #04162a;
+  --card:   #071d33;
+  --border: #0d3557;
+  --cyan:   #00d4ff;
+  --aqua:   #00ffb3;
+  --warn:   #ff3b3b;
+  --text:   #ddeeff;
+  --muted:  #4d7a9e;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+#sonar-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.2;
+}
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 64px;
+  background: rgba(2,12,24,0.9); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.12em; color: var(--cyan); text-decoration: none; }
+.nav-logo span { color: var(--aqua); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--cyan); }
+.nav-links a.nav-cta { color: var(--cyan); }
+.nav-links a.nav-cta:hover { color: var(--aqua); }
+
+/* Page Hero */
+.page-hero {
+  position: relative; z-index: 1;
+  padding: 140px 48px 80px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  overflow: hidden;
+}
+.page-hero::before {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; left: 55%;
+  background: linear-gradient(135deg, transparent, rgba(0,212,255,0.04));
+  z-index: 0;
+}
+.page-hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.page-hero-text {}
+.eyebrow { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--aqua); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.eyebrow::before { content: '//'; opacity: 0.5; }
+h1.page-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 5vw, 5rem); letter-spacing: 0.04em; line-height: 0.95; color: #fff; margin-bottom: 24px; }
+h1.page-title span { color: var(--cyan); }
+.page-intro { font-size: 1.08rem; color: #7aafcc; font-weight: 300; max-width: 520px; }
+
+.meta-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.meta-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+.meta-row:last-child { border-bottom: none; padding-bottom: 0; }
+.meta-key { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.meta-val { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--cyan); text-align: right; }
+
+/* Main layout */
+.about-body { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+.section-pad { padding: 80px 48px; }
+
+.section-grid { display: grid; grid-template-columns: 280px 1fr; gap: 60px; align-items: start; }
+.section-sidebar {}
+.section-num { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 0.06em; color: rgba(0,212,255,0.1); line-height: 1; margin-bottom: 4px; }
+.section-label { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.sidebar-accent { width: 2px; height: 48px; background: var(--cyan); margin-top: 16px; }
+
+.section-content {}
+h2.section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 3.5vw, 2.8rem); letter-spacing: 0.05em; line-height: 1; color: #fff; margin-bottom: 24px; }
+h2.section-title span { color: var(--cyan); }
+.body-text { font-size: 1rem; color: #8ab5d0; line-height: 1.75; margin-bottom: 20px; }
+.body-text strong { color: var(--text); font-weight: 600; }
+
+/* Objective list */
+.obj-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.obj-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; color: #8ab5d0; }
+.obj-list li::before { content: '→'; color: var(--cyan); font-family: 'DM Mono', monospace; flex-shrink: 0; margin-top: 2px; }
+
+/* Section divider */
+.s-divider { border: none; border-top: 1px solid var(--border); margin: 0 48px; }
+
+/* Why enhancement matters — comparison */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border); margin-top: 32px; }
+.compare-cell { background: var(--card); padding: 28px 24px; }
+.compare-cell.raw h4 { color: var(--muted); }
+.compare-cell.enh h4 { color: var(--aqua); }
+.compare-cell h4 { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.08em; margin-bottom: 12px; }
+.compare-cell ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.compare-cell ul li { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: #4d7a9e; display: flex; align-items: center; gap: 8px; }
+.compare-cell.raw ul li::before { content: '✗'; color: var(--warn); }
+.compare-cell.enh ul li::before { content: '✓'; color: var(--aqua); }
+
+/* Architecture blocks */
+.arch-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; background: var(--border); margin-top: 32px; }
+.arch-card { background: var(--card); padding: 28px 24px; }
+.arch-tag { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); border: 1px solid rgba(0,212,255,0.3); padding: 3px 8px; display: inline-block; margin-bottom: 12px; }
+.arch-card h4 { font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem; letter-spacing: 0.06em; color: #fff; margin-bottom: 10px; }
+.arch-card p { font-size: 0.88rem; color: #5a8aaa; line-height: 1.55; }
+
+/* Loss stages table */
+.stage-table { width: 100%; border-collapse: collapse; margin-top: 28px; font-family: 'DM Mono', monospace; font-size: 0.65rem; }
+.stage-table th { text-align: left; padding: 8px 16px; background: var(--card); border-bottom: 1px solid var(--border); letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.stage-table td { padding: 10px 16px; border-bottom: 1px solid rgba(13,53,87,0.5); color: #6b9ab8; }
+.stage-table tr:hover td { background: rgba(7,29,51,0.5); }
+.stage-table td:first-child { color: var(--cyan); }
+.stage-active { color: var(--aqua) !important; }
+
+/* Applications */
+.apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border); margin-top: 32px; }
+.app-card { background: var(--card); padding: 28px 24px; text-align: center; transition: background 0.2s; }
+.app-card:hover { background: #0a2240; }
+.app-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+.app-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.08em; color: var(--cyan); margin-bottom: 8px; }
+.app-desc { font-size: 0.82rem; color: #4d7a9e; line-height: 1.5; }
+
+/* Summary block */
+.summary-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--aqua);
+  padding: 36px 40px;
+  margin-top: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.summary-block::before {
+  content: '"';
+  position: absolute; top: -20px; left: 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 8rem;
+  color: rgba(0,255,179,0.05);
+  line-height: 1;
+}
+.summary-block p { font-size: 1.05rem; color: #8ab5d0; line-height: 1.75; font-style: italic; position: relative; }
+
+/* CTA footer */
+.about-cta {
+  background: linear-gradient(135deg, #020c18, #04162a, #020c18);
+  border-top: 1px solid var(--border);
+  padding: 80px 48px;
+  text-align: center;
+  position: relative; z-index: 1;
+}
+.about-cta h3 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.06em; color: #fff; margin-bottom: 12px; }
+.about-cta p { font-size: 1rem; color: var(--muted); margin-bottom: 32px; font-style: italic; font-weight: 300; }
+.btn-primary { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 14px 32px; background: var(--cyan); color: #020c18; border: none; cursor: pointer; text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+.btn-primary:hover { background: var(--aqua); transform: translateY(-2px); }
+
+footer { background: #010810; border-top: 1px solid var(--border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+.footer-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.12em; color: var(--muted); }
+.footer-brand span { color: var(--cyan); }
+.footer-note { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; color: #1e3a52; text-transform: uppercase; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 900px) {
+  .page-hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .section-grid { grid-template-columns: 1fr; gap: 24px; }
+  .arch-grid { grid-template-columns: 1fr; }
+  .apps-grid { grid-template-columns: repeat(2, 1fr); }
+  .compare-grid { grid-template-columns: 1fr; }
+  nav { padding: 0 20px; }
+  .section-pad { padding: 60px 24px; }
+  .page-hero { padding: 120px 24px 60px; }
+}
+</style>
+</head>
+<body>
+<canvas id="sonar-canvas"></canvas>
+
+<nav>
+  <a class="nav-logo" href="/">AQUA<span>VISION</span></a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/about" class="active">About</a></li>
+    <li><a href="/upload">Upload</a></li>
+    <li><a href="/results">Results</a></li>
+    <li><a href="/upload" class="nav-cta">→ Try Now</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="eyebrow">Project Documentation</div>
+      <h1 class="page-title">ABOUT THE<br /><span>PROJECT</span></h1>
+      <p class="page-intro">
+        This project presents an AI-based pipeline for underwater video enhancement and maritime object detection. It is designed to improve the visibility of underwater frames before applying object detection, making it more suitable for challenging marine environments where clarity is poor and threats may be difficult to identify.
+      </p>
+    </div>
+    <div class="meta-box">
+      <div class="meta-row">
+        <span class="meta-key">Enhancement Model</span>
+        <span class="meta-val">LightweightUNet (TRT FP16)</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Detection Model</span>
+        <span class="meta-val">YOLOv26-M (TRT FP16)</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Object Classes</span>
+        <span class="meta-val">13 Marine Classes</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Enhancement PSNR</span>
+        <span class="meta-val">24.87 dB</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Enhancement SSIM</span>
+        <span class="meta-val">0.891</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Detection mAP@50</span>
+        <span class="meta-val">84.7%</span>
+      </div>
+      <div class="meta-row" style="border-bottom:none;padding-bottom:0">
+        <span class="meta-key">Tracker</span>
+        <span class="meta-val">ByteTrack</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BODY SECTIONS -->
+<div class="about-body">
+
+  <!-- 01 Objective -->
+  <div class="section-pad reveal">
+    <div class="section-grid">
+      <div class="section-sidebar">
+        <div class="section-num">01</div>
+        <div class="section-label">Project Objective</div>
+        <div class="sidebar-accent"></div>
+      </div>
+      <div class="section-content">
+        <h2 class="section-title">PROJECT <span>OBJECTIVE</span></h2>
+        <p class="body-text">
+          The main objective is to build an efficient and accurate system that can:
+        </p>
+        <ul class="obj-list">
+          <li>enhance underwater video frames</li>
+          <li>detect marine objects reliably</li>
+          <li>identify potential maritime threats</li>
+          <li>run efficiently using GPU-accelerated inference</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="s-divider" />
+
+  <!-- 02 Why Enhancement -->
+  <!-- FIX: restored the missing opening <p> tag; removed orphaned </p> -->
+  <div class="section-pad reveal">
+    <div class="section-grid">
+      <div class="section-sidebar">
+        <div class="section-num">02</div>
+        <div class="section-label">Enhancement Rationale</div>
+        <div class="sidebar-accent"></div>
+      </div>
+      <div class="section-content">
+        <h2 class="section-title">WHY ENHANCEMENT IS <span>IMPORTANT</span></h2>
+        <p class="body-text">
+          Direct object detection on raw underwater images often performs poorly because of low contrast, haze, blue-green color dominance, and distortion. By enhancing the image first, the detector receives cleaner and more informative frames, which improves downstream detection performance.
+        </p>
+        <p class="body-text">
+          Blue-dominated color channels, reduced contrast, haze, and uneven illumination all degrade detection confidence and recall significantly.
+        </p>
+        <p class="body-text">
+          By inserting an enhancement stage before detection, the pipeline normalizes each frame toward
+          the visual characteristics the detector was trained to expect — improving both precision and
+          recall without requiring re-training the detector on degraded images.
+        </p>
+        <div class="compare-grid">
+          <div class="compare-cell raw">
+            <h4>Without Enhancement</h4>
+            <ul>
+              <li>Heavy blue-green color cast</li>
+              <li>Low contrast and detail loss</li>
+              <li>High false-negative rate</li>
+              <li>Poor mine detection recall</li>
+              <li>Unreliable confidence scores</li>
+            </ul>
+          </div>
+          <div class="compare-cell enh">
+            <h4>With UNet Enhancement</h4>
+            <ul>
+              <li>Corrected color balance</li>
+              <li>Recovered edges and texture</li>
+              <li>Higher detection confidence</li>
+              <li>Improved mine recall</li>
+              <li>More stable tracking IDs</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="s-divider" />
+
+  <!-- 03 Architecture -->
+  <div class="section-pad reveal">
+    <div class="section-grid">
+      <div class="section-sidebar">
+        <div class="section-num">03</div>
+        <div class="section-label">Model Architecture</div>
+        <div class="sidebar-accent"></div>
+      </div>
+      <div class="section-content">
+        <h2 class="section-title">METHODOLOGY</h2>
+        <p class="body-text">
+          The pipeline uses a two-stage approach:
+        </p>
+        <p class="body-text">
+          <strong>Underwater enhancement stage:</strong> A lightweight UNet-based model improves brightness, contrast, and color balance.
+        </p>
+        <p class="body-text">
+          <strong>Detection stage:</strong> The enhanced frame is passed to YOLOv26-M for object detection and tracking.
+        </p>
+        <p class="body-text">
+          This design improves both visual quality and detection reliability in underwater scenes.
+        </p>
+        <div class="arch-grid">
+          <div class="arch-card">
+            <span class="arch-tag">Enhancement</span>
+            <h4>Lightweight UNet with attention modules</h4>
+            <p>Designed for efficient underwater image restoration with integrated attention mechanisms.</p>
+          </div>
+          <div class="arch-card">
+            <span class="arch-tag">Enhancement</span>
+            <h4>Adaptive instance normalization for style-aware enhancement</h4>
+            <p>Allows the model to adapt its enhancement style based on input image characteristics.</p>
+          </div>
+          <div class="arch-card">
+            <span class="arch-tag">Enhancement</span>
+            <h4>Color correction module for underwater statistics</h4>
+            <p>Specialized module that corrects color distortions common in underwater environments.</p>
+          </div>
+          <div class="arch-card">
+            <span class="arch-tag">Enhancement</span>
+            <h4>Depthwise separable convolutions for efficiency</h4>
+            <p>Optimized convolutional layers that reduce computational complexity while maintaining performance.</p>
+          </div>
+          <div class="arch-card">
+            <span class="arch-tag">Detection</span>
+            <h4>YOLOv26-M for multi-class marine object detection</h4>
+            <p>Advanced YOLO model trained to detect various marine objects and threats.</p>
+          </div>
+          <div class="arch-card">
+            <span class="arch-tag">Optimization</span>
+            <h4>TensorRT engines for fast inference</h4>
+            <p>GPU-accelerated inference engines that provide real-time processing capabilities.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="s-divider" />
+
+  <!-- 04 Training -->
+  <div class="section-pad reveal">
+    <div class="section-grid">
+      <div class="section-sidebar">
+        <div class="section-num">04</div>
+        <div class="section-label">Training Strategy</div>
+        <div class="sidebar-accent"></div>
+      </div>
+      <div class="section-content">
+        <h2 class="section-title">PROGRESSIVE <span>TRAINING</span></h2>
+        <p class="body-text">
+          The UNet was trained across five progressive stages, each introducing additional loss terms to guide
+          the model toward perceptually richer output. This curriculum approach prevents early over-fitting
+          to pixel-level metrics at the expense of structural and perceptual quality.
+        </p>
+        <p class="body-text">
+          Training used mixed-precision (FP16 autocast) with AdamW, OneCycleLR scheduling, and weighted
+          sampling to oversample difficult image types — dark, extreme blue, and hazy underwater frames.
+        </p>
+        <table class="stage-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Epochs</th>
+              <th>Active Losses</th>
+              <th>Val SSIM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>1–14</td><td>Charbonnier L1</td><td>0.861</td></tr>
+            <tr><td>2</td><td>15–28</td><td>+ SSIM Loss</td><td>0.882</td></tr>
+            <tr><td>3</td><td>29–44</td><td>+ Sobel Edge Loss</td><td>0.887</td></tr>
+            <tr><td>4</td><td>45–74</td><td>+ LAB Color + Histogram</td><td>0.889</td></tr>
+            <tr><td>5</td><td>75–108</td><td class="stage-active">+ VGG Perceptual Loss</td><td class="stage-active">0.891</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <hr class="s-divider" />
+
+  <!-- 05 Applications -->
+  <div class="section-pad reveal">
+    <div class="section-grid">
+      <div class="section-sidebar">
+        <div class="section-num">05</div>
+        <div class="section-label">Use Cases</div>
+        <div class="sidebar-accent"></div>
+      </div>
+      <div class="section-content">
+        <h2 class="section-title">WHERE THIS <span>CAN BE USED</span></h2>
+        <p class="body-text">
+          The pipeline is designed for operational environments where underwater visibility is a known
+          constraint and object identification carries security or scientific significance.
+        </p>
+        <div class="apps-grid">
+          <div class="app-card">
+            <span class="app-icon">🛡️</span>
+            <div class="app-title">Maritime security</div>
+            <div class="app-desc">Monitor restricted maritime zones for unauthorized divers, underwater vehicles, or suspicious objects.</div>
+          </div>
+          <div class="app-card">
+            <span class="app-icon">💣</span>
+            <div class="app-title">Naval mine detection</div>
+            <div class="app-desc">Real-time naval mine identification with persistent unique tracking and immediate visual alerting.</div>
+          </div>
+          <div class="app-card">
+            <span class="app-icon">📡</span>
+            <div class="app-title">Underwater surveillance</div>
+            <div class="app-desc">Automated analysis of underwater camera feeds for continuous, unattended monitoring operations.</div>
+          </div>
+          <div class="app-card">
+            <span class="app-icon">🐠</span>
+            <div class="app-title">Marine research</div>
+            <div class="app-desc">Support biodiversity surveys by automating identification of fish, coral, jellyfish, and other species.</div>
+          </div>
+          <div class="app-card">
+            <span class="app-icon">🌿</span>
+            <div class="app-title">Environmental monitoring</div>
+            <div class="app-desc">Track debris and plastic pollution in underwater environments as part of environmental assessment programs.</div>
+          </div>
+          <div class="app-card">
+            <span class="app-icon">🤖</span>
+            <div class="app-title">Autonomous underwater vehicle support</div>
+            <div class="app-desc">Integrate with autonomous underwater vehicle systems to provide real-time scene understanding.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="s-divider" />
+
+  <!-- 06 Summary -->
+  <div class="section-pad reveal">
+    <div class="section-grid">
+      <div class="section-sidebar">
+        <div class="section-num">06</div>
+        <div class="section-label">Summary</div>
+        <div class="sidebar-accent"></div>
+      </div>
+      <div class="section-content">
+        <h2 class="section-title">PROJECT <span>SUMMARY</span></h2>
+        <p class="body-text">
+          This project combines underwater image enhancement and object detection into a single optimized pipeline. The result is a practical system for analyzing underwater video footage with better visibility, improved detection accuracy, and faster execution.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /about-body -->
+
+<!-- CTA — FIX: href changed from "upload.html" to "/upload" -->
+<div class="about-cta">
+  <h3>READY TO SEE IT IN ACTION?</h3>
+  <p>Upload your own underwater video and process it through the full pipeline.</p>
+  <a class="btn-primary" href="/upload">Upload Video →</a>
+</div>
+
+<footer>
+  <div class="footer-brand">AQUA<span>VISION</span></div>
+  <div class="footer-note">Underwater Enhancement · Maritime Detection · TensorRT</div>
+</footer>
+
+<script>
+/* Subtle sonar canvas */
+const canvas = document.getElementById('sonar-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, rings = [], pTimer = 0;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+function addRing() { rings.push({ cx: W * 0.85, cy: H * 0.3, r: 0, maxR: 500, speed: 0.5 }); }
+addRing();
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(13,53,87,0.2)'; ctx.lineWidth = 0.5;
+  for (let x = 0; x < W; x += 80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  rings.forEach((r, i) => {
+    r.r += r.speed;
+    const a = 0.4 * (1 - r.r / r.maxR);
+    ctx.beginPath(); ctx.arc(r.cx, r.cy, r.r, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(0,212,255,${a})`; ctx.lineWidth = 1; ctx.stroke();
+    if (r.r >= r.maxR) rings.splice(i,1);
+  });
+  pTimer++; if (pTimer % 180 === 0) addRing();
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* Scroll reveal */
+const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }), { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

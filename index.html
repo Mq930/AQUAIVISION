@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AQUAVISION — Underwater AI Enhancement & Detection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:       #020c18;
+  --bg2:      #04162a;
+  --card:     #071d33;
+  --border:   #0d3557;
+  --cyan:     #00d4ff;
+  --aqua:     #00ffb3;
+  --warn:     #ff3b3b;
+  --text:     #ddeeff;
+  --muted:    #4d7a9e;
+  --glow:     rgba(0,212,255,0.15);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── CANVAS BG ── */
+#sonar-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(2,12,24,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--aqua); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--cyan); }
+/* ── FIX: Try Now is a CTA link, not an active-page indicator ── */
+.nav-links a.nav-cta {
+  color: var(--cyan);
+}
+.nav-links a.nav-cta:hover { color: var(--aqua); }
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 80px 48px 60px;
+  overflow: hidden;
+}
+.hero-content { max-width: 720px; }
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aqua);
+  border: 1px solid rgba(0,255,179,0.3);
+  padding: 5px 12px;
+  border-radius: 2px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.8s ease both;
+}
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--aqua);
+  border-radius: 50%;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+h1.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.2rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 8px;
+  animation: fadeUp 0.8s 0.15s ease both;
+}
+h1.hero-title .accent { color: var(--cyan); }
+
+.hero-sub {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--muted);
+  margin-bottom: 36px;
+  max-width: 560px;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+.hero-desc {
+  font-size: 1.05rem;
+  color: #8ab5d0;
+  margin-bottom: 48px;
+  max-width: 580px;
+  animation: fadeUp 0.8s 0.45s ease both;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.6s ease both;
+}
+.btn-primary {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  background: var(--cyan);
+  color: #020c18;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  transition: all 0.2s;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.btn-primary:hover { background: var(--aqua); transform: translateY(-2px); }
+.btn-outline {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 13px 32px;
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+.btn-outline:hover { background: rgba(0,212,255,0.08); transform: translateY(-2px); }
+
+/* Hero right — split preview */
+.hero-visual {
+  position: absolute;
+  right: 48px; top: 50%;
+  transform: translateY(-50%);
+  width: 480px;
+  animation: fadeUp 0.9s 0.5s ease both;
+}
+.split-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.split-label {
+  position: absolute;
+  bottom: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  background: rgba(2,12,24,0.8);
+  border-radius: 1px;
+  z-index: 2;
+}
+.split-label.left { left: 8px; color: var(--muted); }
+.split-label.right { right: 8px; color: var(--cyan); }
+
+.split-left, .split-right {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.split-left { left: 0; background: linear-gradient(135deg, #041020 0%, #0a2040 100%); }
+.split-right { right: 0; background: linear-gradient(135deg, #041828 0%, #062840 100%); }
+
+.degraded-scene {
+  width: 100%; height: 100%;
+  position: relative;
+  overflow: hidden;
+  filter: hue-rotate(180deg) saturate(0.4) brightness(0.5) blur(1.2px);
+}
+.enhanced-scene {
+  width: 100%; height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.detection-box {
+  position: absolute;
+  border: 1.5px solid;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+}
+.det-diver  { border-color: #50b4ff; color: #50b4ff; top: 22%; left: 18%; width: 28%; height: 40%; }
+.det-fish   { border-color: #ffb450; color: #ffb450; top: 55%; left: 60%; width: 18%; height: 25%; }
+.det-coral  { border-color: #50ffb4; color: #50ffb4; top: 65%; left: 15%; width: 30%; height: 28%; }
+.det-mine   { border-color: #ff3b3b; color: #ff3b3b; top: 30%; left: 62%; width: 24%; height: 30%; }
+.det-label  { position: absolute; top: -1px; left: 0; background: currentColor; color: #000; padding: 1px 4px; font-size: 0.4rem; }
+.mine-warn  { position: absolute; top: 0; left: 0; right: 0; height: 18px; background: rgba(255,59,59,0.7); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.45rem; letter-spacing: 0.12em; color: #fff; animation: warnPulse 1s ease-in-out infinite; }
+.hud-bar    { position: absolute; bottom: 0; left: 0; right: 0; height: 16px; background: rgba(2,12,24,0.7); display: flex; align-items: center; padding: 0 6px; gap: 10px; }
+.hud-item   { font-family: 'DM Mono', monospace; font-size: 0.4rem; color: var(--muted); letter-spacing: 0.08em; }
+
+.divider-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%; width: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+  z-index: 3;
+}
+
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.5), transparent);
+  animation: scanDown 4s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* stats row */
+.hero-stats {
+  position: absolute;
+  bottom: 32px;
+  right: 48px;
+  display: flex;
+  gap: 24px;
+  z-index: 5;
+  animation: fadeUp 0.8s 0.75s ease both;
+}
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  border-right: 2px solid var(--border);
+  padding-right: 16px;
+}
+.stat-pill:last-child { border-right: none; }
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+  line-height: 1;
+}
+.stat-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── SECTION COMMONS ── */
+section { position: relative; z-index: 1; }
+.section-pad { padding: 100px 48px; }
+.section-pad-sm { padding: 80px 48px; }
+
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aqua);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before { content: '//'; opacity: 0.5; }
+
+h2.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.section-lead {
+  font-size: 1.1rem;
+  color: #6b9ab8;
+  max-width: 560px;
+  font-style: italic;
+  font-weight: 300;
+  margin-bottom: 60px;
+}
+
+/* ── PROBLEM SECTION ── */
+.problem-section { background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%); }
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.problem-list { display: flex; flex-direction: column; gap: 24px; }
+.problem-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+}
+.problem-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.problem-item h4 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  margin-bottom: 4px;
+}
+.problem-item p { font-size: 0.95rem; color: #6b9ab8; line-height: 1.5; }
+
+.problem-visual { position: relative; }
+.challenge-diagram {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 32px;
+  text-align: center;
+}
+.challenge-diagram .diag-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.depth-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  height: 140px;
+  margin-bottom: 16px;
+}
+.depth-bar {
+  width: 36px;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+  transition: all 0.3s;
+}
+.depth-bar span {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.45rem;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+.depth-bar .bar-val {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* ── PIPELINE SECTION ── */
+.pipeline-section { background: var(--bg2); }
+.pipeline-steps {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.pipeline-steps::before {
+  content: '';
+  position: absolute;
+  top: 44px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), var(--border), var(--border), var(--border), transparent);
+  z-index: 0;
+}
+.step-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 12px;
+}
+.step-num {
+  width: 48px; height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  position: relative;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+.step-card.highlight .step-num {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: #020c18;
+  box-shadow: 0 0 20px rgba(0,212,255,0.4);
+}
+.step-card.warn-step .step-num {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255,59,59,0.4);
+}
+.step-icon { font-size: 1.4rem; margin-bottom: 12px; }
+.step-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.step-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+.step-arrow {
+  position: absolute;
+  top: 44px;
+  right: -6px;
+  width: 12px; height: 12px;
+  border-top: 1px solid var(--cyan);
+  border-right: 1px solid var(--cyan);
+  transform: translateY(-50%) rotate(45deg);
+  z-index: 2;
+}
+
+/* ── FEATURES SECTION ── */
+.features-section { background: var(--bg); }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--border);
+}
+.feature-card {
+  background: var(--card);
+  padding: 36px 32px;
+  transition: background 0.2s;
+  cursor: default;
+}
+.feature-card:hover { background: #0a2240; }
+.feat-icon { font-size: 1.8rem; margin-bottom: 16px; display: block; }
+.feat-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+.feat-desc { font-size: 0.88rem; color: #6b9ab8; line-height: 1.55; }
+
+/* ── PERFORMANCE SECTION ── */
+.perf-section { background: var(--bg2); }
+.perf-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--border);
+  max-width: 1200px;
+  margin: 0 auto 60px;
+}
+.perf-card {
+  background: var(--card);
+  padding: 40px 28px;
+  text-align: center;
+}
+.perf-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.perf-val.aqua { color: var(--aqua); }
+.perf-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.perf-note { font-size: 0.82rem; color: #4d7a9e; font-style: italic; }
+
+.mini-chart-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--border);
+}
+.mini-chart-card {
+  background: var(--card);
+  padding: 32px;
+}
+.chart-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 80px;
+}
+.c-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  transition: opacity 0.2s;
+}
+.c-bar:hover { opacity: 0.7; }
+
+/* ── CTA ── */
+.cta-section {
+  background: linear-gradient(135deg, #020c18 0%, #041e38 50%, #020c18 100%);
+  border-top: 1px solid var(--border);
+  padding: 120px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(0,212,255,0.06), transparent);
+}
+.cta-section h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  letter-spacing: 0.06em;
+  color: #fff;
+  margin-bottom: 16px;
+  position: relative;
+}
+.cta-section p {
+  font-size: 1.1rem;
+  color: #4d7a9e;
+  max-width: 500px;
+  margin: 0 auto 40px;
+  font-style: italic;
+  font-weight: 300;
+  position: relative;
+}
+.cta-section .btn-primary { position: relative; font-size: 0.8rem; padding: 18px 48px; }
+
+/* ── FOOTER ── */
+footer {
+  background: #010810;
+  border-top: 1px solid var(--border);
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.footer-brand span { color: var(--cyan); }
+.footer-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: #1e3a52;
+  text-transform: uppercase;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+@keyframes warnPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+@keyframes scanDown {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 1100px) {
+  .hero-visual { display: none; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .pipeline-steps { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .pipeline-steps::before { display: none; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .perf-grid { grid-template-columns: repeat(2, 1fr); }
+  .mini-chart-wrap { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  nav { padding: 0 20px; }
+  .section-pad, .section-pad-sm { padding: 60px 20px; }
+  .hero { padding: 80px 20px 60px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .pipeline-steps { grid-template-columns: 1fr; }
+  footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="sonar-canvas"></canvas>
+
+<!-- NAV — FIX: removed class="active" from Try Now; it's a CTA, not a current-page indicator -->
+<nav>
+  <a class="nav-logo" href="/">AQUA<span>VISION</span></a>
+  <ul class="nav-links">
+    <li><a href="/" class="active">Home</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/upload">Upload</a></li>
+    <li><a href="/results">Results</a></li>
+    <li><a href="/upload" class="nav-cta">→ Try Now</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">Maritime Security · AI Vision Pipeline</div>
+    <h1 class="hero-title">AI-POWERED UNDERWATER<br /><span class="accent">IMAGE ENHANCEMENT</span><br />AND MARITIME THREAT DETECTION</h1>
+    <p class="hero-sub">Enhance. Detect. Secure.</p>
+    <p class="hero-desc">
+      A two-stage vision pipeline that enhances degraded underwater video frames using a lightweight UNet-based model and detects marine objects and threats using a YOLOv26-M detector in real time.
+    </p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="/upload">Upload Video</a>
+      <a class="btn-outline" href="/about">View Project Overview</a>
+    </div>
+  </div>
+
+  <!-- Split Preview Visual -->
+  <div class="hero-visual">
+    <div class="split-preview">
+      <div class="scan-line"></div>
+      <div class="split-left">
+        <div class="degraded-scene" style="width:100%;height:100%;background:linear-gradient(135deg,#041020,#0a2040);"></div>
+        <span class="split-label left">RAW INPUT</span>
+      </div>
+      <div class="split-right">
+        <div class="enhanced-scene" style="width:100%;height:100%;background:linear-gradient(135deg,#041828,#083050);">
+          <div class="mine-warn">⚠ NAVAL MINE DETECTED — UNIQUE: 1</div>
+          <div class="detection-box det-diver"><span class="det-label">diver 0.92</span></div>
+          <div class="detection-box det-fish"><span class="det-label">fish 0.87</span></div>
+          <div class="detection-box det-coral"><span class="det-label">coral 0.78</span></div>
+          <div class="detection-box det-mine"><span class="det-label">naval_mine 0.95</span></div>
+          <div class="hud-bar">
+            <span class="hud-item">FRAME 00218</span>
+            <span class="hud-item">|</span>
+            <span class="hud-item">47.3 FPS</span>
+            <span class="hud-item">|</span>
+            <span class="hud-item">TENSORRT FP16</span>
+          </div>
+        </div>
+        <span class="split-label right">ENHANCED + DETECTED</span>
+      </div>
+      <div class="divider-line"></div>
+    </div>
+  </div>
+
+  <!-- Hero stats -->
+  <div class="hero-stats">
+    <div class="stat-pill"><span class="stat-val">0.891</span><span class="stat-key">SSIM Score</span></div>
+    <div class="stat-pill"><span class="stat-val">24.87</span><span class="stat-key">PSNR (dB)</span></div>
+    <div class="stat-pill"><span class="stat-val">84.7%</span><span class="stat-key">mAP@50</span></div>
+    <div class="stat-pill" style="border-right:none"><span class="stat-val">13</span><span class="stat-key">Object Classes</span></div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem-section section-pad">
+  <div class="problem-grid">
+    <div class="reveal">
+      <div class="eyebrow">The Challenge</div>
+      <h2 class="section-title">WHY THIS SYSTEM IS NEEDED</h2>
+      <p class="section-lead">Underwater environments suffer from low visibility, color distortion, scattering, and noise, which make object detection difficult. This project addresses these challenges by first enhancing each video frame and then performing object detection to support maritime monitoring and security applications.</p>
+      <div class="problem-list">
+        <div class="problem-item">
+          <div class="problem-icon">🌊</div>
+          <div>
+            <h4>Color Attenuation</h4>
+            <p>Red and orange wavelengths are absorbed within meters of the surface, leaving heavy blue-green dominance that confuses detectors.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">🌫️</div>
+          <div>
+            <h4>Scattering & Haze</h4>
+            <p>Suspended particles diffuse light and reduce contrast, smearing fine details needed for threat identification.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">🔦</div>
+          <div>
+            <h4>Low Illumination</h4>
+            <p>Deep or murky water eliminates ambient light, making it nearly impossible for standard detectors to locate objects reliably.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">⚠️</div>
+          <div>
+            <h4>High-Stakes Detection</h4>
+            <p>Missing a naval mine or misidentifying a threat in maritime security is not an option — precision matters at every frame.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay:0.2s">
+      <div class="challenge-diagram">
+        <div class="diag-title">Detection Accuracy — Raw vs. Enhanced</div>
+        <div class="depth-bars" id="depthBars"></div>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:32px">
+          <div style="display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted)">
+            <span style="width:10px;height:10px;background:#1e3a52;display:inline-block"></span> Raw Input
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted)">
+            <span style="width:10px;height:10px;background:var(--cyan);display:inline-block"></span> Enhanced
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="pipeline-section section-pad">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="reveal">
+      <div class="eyebrow">System Design</div>
+      <h2 class="section-title">HOW THE PIPELINE WORKS</h2>
+      <p class="section-lead">Six stages from raw video input to annotated threat-detection output.</p>
+    </div>
+    <div class="pipeline-steps reveal" style="transition-delay:0.15s">
+      <div class="step-card">
+        <div class="step-num">01<div class="step-arrow"></div></div>
+        <div class="step-icon">🎬</div>
+        <div class="step-name">Video Input</div>
+        <div class="step-desc">Upload underwater video footage for analysis.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02<div class="step-arrow"></div></div>
+        <div class="step-icon">🖼️</div>
+        <div class="step-name">Frame Extraction</div>
+        <div class="step-desc">Break the video into individual frames.</div>
+      </div>
+      <div class="step-card highlight">
+        <div class="step-num">03<div class="step-arrow"></div></div>
+        <div class="step-icon">✨</div>
+        <div class="step-name">Image Enhancement</div>
+        <div class="step-desc">Improve visibility using the UNet-based enhancement model.</div>
+      </div>
+      <div class="step-card highlight">
+        <div class="step-num">04<div class="step-arrow"></div></div>
+        <div class="step-icon">🔍</div>
+        <div class="step-name">Object Detection</div>
+        <div class="step-desc">Detect marine objects using YOLOv26-M.</div>
+      </div>
+      <div class="step-card warn-step">
+        <div class="step-num">05<div class="step-arrow"></div></div>
+        <div class="step-icon">⚠️</div>
+        <div class="step-name">Threat Alerting</div>
+        <div class="step-desc">Highlight dangerous objects like naval mines.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">06</div>
+        <div class="step-icon">📹</div>
+        <div class="step-name">Processed Output</div>
+        <div class="step-desc">Generate an annotated output video.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section section-pad">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="reveal">
+      <div class="eyebrow">Capabilities</div>
+      <h2 class="section-title">CORE FEATURES</h2>
+    </div>
+    <div class="features-grid reveal" style="transition-delay:0.1s">
+      <div class="feature-card">
+        <span class="feat-icon">🖼️</span>
+        <div class="feat-title">Frame-by-frame underwater enhancement</div>
+        <div class="feat-desc">Each video frame is processed individually to restore clarity and color quality in degraded underwater conditions.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">⚡</span>
+        <div class="feat-title">TensorRT-optimized inference</div>
+        <div class="feat-desc">GPU-accelerated processing using TensorRT engines for fast, efficient model execution.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">🔍</span>
+        <div class="feat-title">Real-time object detection</div>
+        <div class="feat-desc">Continuous detection of marine objects and threats as the video plays.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">⚠️</span>
+        <div class="feat-title">Naval mine warning system</div>
+        <div class="feat-desc">Special alerts and highlighting for detected naval mines and other maritime threats.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">🏷️</span>
+        <div class="feat-title">Multi-class marine object identification</div>
+        <div class="feat-desc">Detection and classification of various marine life, debris, and objects.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">📹</span>
+        <div class="feat-title">Output video with bounding boxes and HUD overlay</div>
+        <div class="feat-desc">Annotated video output showing detections with visual overlays and information displays.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERFORMANCE -->
+<section class="perf-section section-pad">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="reveal">
+      <div class="eyebrow">Results</div>
+      <h2 class="section-title">MODEL PERFORMANCE</h2>
+      <p class="section-lead">Metrics after full multi-stage training across both models.</p>
+    </div>
+    <div class="perf-grid reveal" style="transition-delay:0.1s">
+      <div class="perf-card">
+        <div class="perf-val">24.87</div>
+        <div class="perf-label">PSNR (dB)</div>
+        <div class="perf-note">Enhancement quality — UNet output vs. ground truth</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-val aqua">0.891</div>
+        <div class="perf-label">SSIM Score</div>
+        <div class="perf-note">Structural similarity — perceptual fidelity to target</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-val">84.7<span style="font-size:1.4rem">%</span></div>
+        <div class="perf-label">mAP@50</div>
+        <div class="perf-note">Detection accuracy — YOLOv26-M on marine objects</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-val aqua">FP16</div>
+        <div class="perf-label">Inference Mode</div>
+        <div class="perf-note">TensorRT half-precision — maximized GPU throughput</div>
+      </div>
+    </div>
+
+    <div class="mini-chart-wrap reveal" style="transition-delay:0.2s;margin-top:2px">
+      <div class="mini-chart-card">
+        <div class="chart-title">UNet Val SSIM — Training Progression (Epochs 1–108)</div>
+        <div class="chart-bars" id="ssimChart"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted)">
+          <span>Epoch 1</span><span>Stage 2: +SSIM</span><span>Stage 3: +Sobel</span><span>Stage 5: +Perc</span>
+        </div>
+      </div>
+      <div class="mini-chart-card">
+        <div class="chart-title">YOLOv26-M mAP@50 — Training Convergence (150 Epochs)</div>
+        <div class="chart-bars" id="mapChart"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted)">
+          <span>Epoch 1</span><span>Epoch 40</span><span>Epoch 80</span><span>Epoch 150</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>TRY THE PIPELINE</h2>
+  <p>Upload an underwater video and see the enhancement and detection pipeline in action.</p>
+  <a class="btn-primary" href="/upload">Start Processing</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">AQUA<span>VISION</span></div>
+  <div class="footer-note">Underwater Enhancement · Maritime Detection · TensorRT</div>
+</footer>
+
+<script>
+/* ── Sonar Canvas Background ── */
+const canvas = document.getElementById('sonar-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, rings = [], particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function initParticles() {
+  particles = [];
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.2 + 0.2,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: (Math.random() - 0.5) * 0.15,
+      a: Math.random() * 0.5 + 0.1
+    });
+  }
+}
+initParticles();
+
+let ringTimer = 0;
+function addRing() {
+  const cx = W * 0.75, cy = H * 0.5;
+  rings.push({ cx, cy, r: 0, maxR: Math.max(W, H) * 0.7, a: 0.6, speed: 0.8 });
+}
+addRing();
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.strokeStyle = 'rgba(13,53,87,0.3)';
+  ctx.lineWidth = 0.5;
+  const gs = 80;
+  for (let x = 0; x < W; x += gs) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += gs) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  rings.forEach((ring, i) => {
+    ring.r += ring.speed;
+    ring.a = 0.6 * (1 - ring.r / ring.maxR);
+    ctx.beginPath();
+    ctx.arc(ring.cx, ring.cy, ring.r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(0,212,255,${ring.a})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    if (ring.r >= ring.maxR) rings.splice(i, 1);
+  });
+
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0,212,255,${p.a})`;
+    ctx.fill();
+  });
+
+  ringTimer++;
+  if (ringTimer % 120 === 0) addRing();
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ── Reveal on scroll ── */
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.12 });
+revealEls.forEach(el => observer.observe(el));
+
+/* ── Depth Bars ── */
+const depthData = [
+  { label: 'fish',    raw: 55, enh: 87 },
+  { label: 'coral',   raw: 48, enh: 82 },
+  { label: 'diver',   raw: 61, enh: 89 },
+  { label: 'mine',    raw: 39, enh: 76 },
+  { label: 'debris',  raw: 43, enh: 78 },
+];
+const dbWrap = document.getElementById('depthBars');
+const maxH = 140;
+depthData.forEach(d => {
+  const grp = document.createElement('div');
+  grp.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;position:relative';
+  grp.innerHTML = `
+    <div style="display:flex;align-items:flex-end;gap:2px;height:${maxH}px">
+      <div class="depth-bar" style="width:16px;height:${d.raw/100*maxH}px;background:#1e3a52"></div>
+      <div class="depth-bar" style="width:16px;height:${d.enh/100*maxH}px;background:var(--cyan)"></div>
+    </div>
+    <span style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--muted);margin-top:6px;letter-spacing:0.05em">${d.label}</span>
+  `;
+  dbWrap.appendChild(grp);
+});
+
+/* ── Mini Charts ── */
+function buildChart(id, data, color) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const max = Math.max(...data), min = Math.min(...data);
+  data.forEach((v, i) => {
+    const h = Math.max(4, ((v - min) / (max - min)) * 72 + 8);
+    const bar = document.createElement('div');
+    bar.className = 'c-bar';
+    bar.style.height = h + 'px';
+    bar.style.background = color;
+    bar.style.opacity = 0.3 + 0.7 * ((v - min) / (max - min));
+    bar.title = v.toFixed(3);
+    wrap.appendChild(bar);
+  });
+}
+
+const ssimSample = [0.792,0.816,0.835,0.839,0.844,0.843,0.853,0.855,0.857,0.858,
+  0.859,0.860,0.860,0.861,0.862,0.867,0.866,0.870,0.870,0.874,0.875,0.878,0.878,
+  0.880,0.880,0.881,0.882,0.882,0.882,0.876,0.878,0.878,0.879,0.881,0.880,0.882,
+  0.884,0.884,0.885,0.885,0.886,0.886,0.886,0.886,0.883,0.884,0.885,0.887,0.887,
+  0.881,0.876,0.882,0.882,0.883,0.884,0.885,0.886,0.886,0.887,0.887,0.888,0.888,
+  0.888,0.889,0.889,0.888,0.889,0.889,0.889,0.886,0.883,0.883,0.881,0.886,0.885,
+  0.885,0.883,0.887,0.886,0.887,0.887,0.886,0.888,0.888,0.889,0.889,0.889,0.888,
+  0.888,0.889,0.890,0.889,0.889,0.890,0.890,0.891,0.891,0.891,0.891,0.891,0.891,
+  0.891,0.891,0.891,0.891,0.891,0.891];
+
+const mapSample = [0.419,0.461,0.312,0.438,0.498,0.499,0.596,0.597,0.639,0.671,
+  0.667,0.698,0.703,0.701,0.714,0.732,0.726,0.732,0.744,0.750,0.753,0.770,0.774,
+  0.772,0.761,0.776,0.784,0.785,0.791,0.789,0.790,0.806,0.810,0.808,0.805,0.809,
+  0.814,0.818,0.819,0.817,0.815,0.821,0.819,0.815,0.815,0.815,0.818,0.825,0.827,
+  0.828,0.825,0.825,0.831,0.832,0.834,0.838,0.840,0.841,0.839,0.840,0.841,0.842,
+  0.845,0.844,0.843,0.845,0.845,0.846,0.846,0.844,0.845,0.845,0.846,0.846,0.846,
+  0.847,0.846,0.846,0.845,0.844,0.844,0.845,0.845,0.846,0.845,0.845,0.845,0.845,
+  0.843,0.843,0.843,0.843,0.844,0.844,0.844,0.845,0.844,0.845,0.845,0.845,0.846,
+  0.846,0.846,0.846,0.846,0.846,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,
+  0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,
+  0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,
+  0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847,0.847];
+
+buildChart('ssimChart', ssimSample, 'var(--aqua)');
+buildChart('mapChart', mapSample, 'var(--cyan)');
+</script>
+</body>
+</html>
