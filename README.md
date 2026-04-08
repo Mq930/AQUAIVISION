@@ -40,15 +40,8 @@ python -m pip install -r requirements.txt
 
 ## Running the app
 
-Activate the project virtual environment and start the server:
 
-```bash
-# Windows PowerShell
-& .\project_venv\Scripts\Activate.ps1
-python main.py
-```
-
-Or run with Uvicorn directly:
+run with Uvicorn directly:
 
 ```bash
 uvicorn main:app --host 127.0.0.1 --port 8080 --reload
