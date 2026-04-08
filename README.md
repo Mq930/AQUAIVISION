@@ -75,7 +75,3 @@ http://127.0.0.1:8080/
 - Processed outputs are saved in `outputs/`.
 - The app expects the TensorRT engine files to be present in the project root and `marine_yolo26m_v1/weights/`.
 - For best performance, use an NVIDIA GPU supported by TensorRT.
-
-## License
-
-This repository does not include a license file. Add one if you plan to share or distribute the project.
