@@ -69,9 +69,19 @@ http://127.0.0.1:8080/
 - `GET /api/status` - Service status summary
 - `POST /api/warmup` - Warm up models in the background
 
+
+## Weights
+
+Download the required model weights and place them in the specified directories:
+
+### U-Net Weights
+- [Download U-Net Weights](https://drive.google.com/file/d/1MF-iSZY1xkioKjvLUqkTcHxrHWzGNZL5/view?usp=drivesdk)
+
+### YOLO Weights
+- [Download YOLO Weights](https://drive.google.com/drive/folders/1FsbNLREkbM8DutZoWhFFmaElH6z_tG-7)
+
 ## Notes
 
 - Uploaded files are saved in `uploads/`.
 - Processed outputs are saved in `outputs/`.
-- The app expects the TensorRT engine files to be present in the project root and `marine_yolo26m_v1/weights/`.
 - For best performance, use an NVIDIA GPU supported by TensorRT.
